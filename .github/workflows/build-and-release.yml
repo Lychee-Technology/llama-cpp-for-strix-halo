@@ -48,7 +48,11 @@ jobs:
           sudo apt-get update
           
           sudo apt-get install -y \
-            rocm-hip-sdk
+            rocm-hip-sdk \
+            rocm \
+            rocm-core \
+            rocm-cmake \
+            rocminfo
 
           # Check that hipcc exists
           hipcc --version
