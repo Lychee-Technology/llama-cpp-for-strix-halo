@@ -3,7 +3,7 @@ name: Build llama.cpp with ROCm HIP (gfx1151)
 on:
   push:
     tags:
-      - "v*"
+      - "b*"
   workflow_dispatch:
 
 jobs:
