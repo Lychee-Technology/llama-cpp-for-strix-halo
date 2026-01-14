@@ -27,7 +27,7 @@ jobs:
         run: |
           wget -qO - https://repo.radeon.com/rocm/rocm.gpg.key | sudo tee /etc/apt/trusted.gpg.d/rocm.gpg >/dev/null
           
-          echo "deb [arch=amd64] https://repo.radeon.com/rocm/apt/7.7.1/ubuntu noble main" | sudo tee /etc/apt/sources.list.d/rocm.list
+          echo "deb [arch=amd64] https://repo.radeon.com/rocm/apt/7.1.1/ubuntu noble main" | sudo tee /etc/apt/sources.list.d/rocm.list
           
           sudo apt-get update
           
