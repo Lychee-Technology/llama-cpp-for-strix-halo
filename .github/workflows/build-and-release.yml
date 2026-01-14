@@ -1,0 +1,72 @@
+name: Build llama.cpp with ROCm HIP (gfx1151)
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build with HIP support
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1 Checkout this repo
+      - name: Checkout source
+        uses: actions/checkout@v6
+    
+      - name: Set duckdb_version variable
+        run: |
+          echo "Setting LLAMA_CPP_VER variable"
+          source ./llama_cpp_version
+          echo "LLAMA_CPP_VER=$LLAMA_CPP_VER" >> $GITHUB_ENV
+
+      # 2 Install ROCm dev packages for compile-time HIP support
+      - name: Install ROCm / HIP development packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            hip-base \
+            hip-dev \
+            hipblas-dev \
+            rocwmma-dev \
+            rocm-cmake \
+            rocm-smi-lib \
+            llvm-amdgpu \
+            hip-runtime-amd
+
+          # Check that hipcc exists
+          hipcc --version
+
+      # 3 Install CMake + build tools
+      - name: Install build tools
+        run: |
+          sudo apt-get install -y cmake build-essential ninja-build
+
+      # 4 Clone the official llama.cpp repo
+      - name: Clone llama.cpp
+        run: |
+          git clone --depth 1 --branch $LLAMA_CPP_VER https://github.com/ggml-org/llama.cpp.git
+
+      # 5 Configure & build with HIP and gfx1151
+      - name: Configure and Build llama.cpp
+        run: |
+          cd llama.cpp
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DGGML_HIP=ON \
+            -DAMDGPU_TARGETS="gfx1151"
+          cmake --build build -- -j$(nproc)
+
+      # 6 Package compiled binaries
+      - name: Package artifacts
+        run: |
+          tar -cJf llama-cpp-hip-gfx1151.tar.xz -C llama.cpp/build/bin .
+
+      # 7 Upload the built artifacts
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: llama-cpp-strix-halo 
+          path: artifacts
