@@ -16,7 +16,7 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v6
     
-      - name: Set duckdb_version variable
+      - name: Set LLAMA_CPP_VER variable
         run: |
           echo "Setting LLAMA_CPP_VER variable"
           source ./llama_cpp_version
@@ -25,11 +25,9 @@ jobs:
       # 2 Install ROCm dev packages for compile-time HIP support
       - name: Install ROCm / HIP development packages
         run: |
-          wget -qO - https://repo.radeon.com/rocm/rocm.gpg.key \
-          sudo tee /etc/apt/trusted.gpg.d/rocm.gpg >/dev/null
+          wget -qO - https://repo.radeon.com/rocm/rocm.gpg.key | sudo tee /etc/apt/trusted.gpg.d/rocm.gpg >/dev/null
           
-          echo "deb [arch=amd64] https://repo.radeon.com/rocm/apt/7.7.1/ubuntu noble main" \
-          sudo tee /etc/apt/sources.list.d/rocm.list
+          echo "deb [arch=amd64] https://repo.radeon.com/rocm/apt/7.7.1/ubuntu noble main" | sudo tee /etc/apt/sources.list.d/rocm.list
           
           sudo apt-get update
           
