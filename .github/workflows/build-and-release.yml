@@ -89,14 +89,14 @@ jobs:
       # 6 Package compiled binaries
       - name: Package artifacts
         run: |
-          tar -cJf llama-cpp-hip-gfx1151.tar.xz -C llama.cpp/build/bin .
+          tar -cJf llama-cpp-${LLAMA_CPP_VER}-rocm-${ROCM_VER}-gfx1151.tar.xz -C llama.cpp/build/bin .
 
       # 7 Upload the built artifacts
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: llama-cpp-strix-halo
-          path: llama-cpp-hip-gfx1151.tar.xz
+          path: llama-cpp-*.tar.xz
           retention-days: 1
 
   release:
