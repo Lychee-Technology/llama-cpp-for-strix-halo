@@ -23,35 +23,35 @@ jobs:
           echo "LLAMA_CPP_VER=$LLAMA_CPP_VER" >> $GITHUB_ENV
 
       # 2 Install ROCm dev packages for compile-time HIP support
-      - name: Install ROCm / HIP development packages
-        run: |
-          # Make the directory if it doesn't exist yet.
-          # This location is recommended by the distribution maintainers.
-          sudo mkdir --parents --mode=0755 /etc/apt/keyrings
+      # - name: Install ROCm / HIP development packages
+      #   run: |
+      #     # Make the directory if it doesn't exist yet.
+      #     # This location is recommended by the distribution maintainers.
+      #     sudo mkdir --parents --mode=0755 /etc/apt/keyrings
 
-          # Download the key, convert the signing-key to a full
-          # keyring required by apt and store in the keyring directory
-          wget https://repo.radeon.com/rocm/rocm.gpg.key -O - | \
-            gpg --dearmor | sudo tee /etc/apt/keyrings/rocm.gpg > /dev/null
+      #     # Download the key, convert the signing-key to a full
+      #     # keyring required by apt and store in the keyring directory
+      #     wget https://repo.radeon.com/rocm/rocm.gpg.key -O - | \
+      #       gpg --dearmor | sudo tee /etc/apt/keyrings/rocm.gpg > /dev/null
           
-          sudo tee /etc/apt/sources.list.d/rocm.list << EOF
-          deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/rocm/apt/7.1.1 noble main
-          deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/graphics/7.1.1/ubuntu noble main
-          EOF
+      #     sudo tee /etc/apt/sources.list.d/rocm.list << EOF
+      #     deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/rocm/apt/7.1.1 noble main
+      #     deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/graphics/7.1.1/ubuntu noble main
+      #     EOF
 
-          sudo tee /etc/apt/preferences.d/rocm-pin-600 << EOF
-          Package: *
-          Pin: release o=repo.radeon.com
-          Pin-Priority: 600
-          EOF
+      #     sudo tee /etc/apt/preferences.d/rocm-pin-600 << EOF
+      #     Package: *
+      #     Pin: release o=repo.radeon.com
+      #     Pin-Priority: 600
+      #     EOF
           
-          sudo apt-get update
+      #     sudo apt-get update
           
-          sudo apt-get install -y \
-            rocm-hip-sdk
+      #     sudo apt-get install -y \
+      #       rocm-hip-sdk
 
-          # Check that hipcc exists
-          hipcc --version
+      #     # Check that hipcc exists
+      #     hipcc --version
 
       # 3 Install CMake + build tools
       - name: Install build tools
