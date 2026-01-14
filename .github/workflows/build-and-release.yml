@@ -102,6 +102,9 @@ jobs:
     if: github.ref_type == 'tag'
     
     steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+ 
       - name: Set LLAMA_CPP_VER variable
         run: |
           echo "Setting LLAMA_CPP_VER variable"
