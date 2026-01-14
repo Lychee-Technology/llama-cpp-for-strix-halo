@@ -21,6 +21,7 @@ jobs:
           echo "Setting LLAMA_CPP_VER variable"
           source ./llama_cpp_version
           echo "LLAMA_CPP_VER=$LLAMA_CPP_VER" >> $GITHUB_ENV
+          echo "ROCM_VER=$ROCM_VER" >> $GITHUB_ENV
 
       # 2 Install CMake + build tools
       - name: Install build tools
@@ -45,8 +46,8 @@ jobs:
             gpg --dearmor | sudo tee /etc/apt/keyrings/rocm.gpg > /dev/null
           
           sudo tee /etc/apt/sources.list.d/rocm.list << EOF
-          deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/rocm/apt/7.1.1 noble main
-          deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/graphics/7.1.1/ubuntu noble main
+          deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/rocm/apt/${ROCM_VER} noble main
+          deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/graphics/${ROCM_VER}/ubuntu noble main
           EOF
 
           sudo tee /etc/apt/preferences.d/rocm-pin-600 << EOF
@@ -91,6 +92,39 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: llama-cpp-strix-halo 
+          name: llama-cpp-strix-halo
           path: llama-cpp-hip-gfx1151.tar.xz
           retention-days: 1
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'tag'
+    
+    steps:
+      - name: Set LLAMA_CPP_VER variable
+        run: |
+          echo "Setting LLAMA_CPP_VER variable"
+          source ./llama_cpp_version
+          echo "LLAMA_CPP_VER=$LLAMA_CPP_VER" >> $GITHUB_ENV
+          echo "ROCM_VER=$ROCM_VER" >> $GITHUB_ENV
+
+      - name: Download llama-cpp-strix-halo artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: llama-cpp-strix-halo 
+          path: ./release
+      
+      - name: List files
+        run: |
+          echo "Files to be released:"
+          ls -lh ./release/
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./release/*
+          body: |
+            `llama.cpp` (${LLAMA_CPP_VER}) compiled for Linux x86_64 with ROCm (${ROCM_VER}), optimized for AMD Strix Halo devices.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
