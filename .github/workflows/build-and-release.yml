@@ -66,7 +66,8 @@ jobs:
 
       # 7 Upload the built artifacts
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: llama-cpp-strix-halo 
-          path: artifacts
+          path: llama-cpp-hip-gfx1151.tar.xz
+          retention-days: 1
