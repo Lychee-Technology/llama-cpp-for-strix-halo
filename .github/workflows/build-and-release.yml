@@ -19,7 +19,7 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v6
     
-      - name: Set LLAMA_CPP_VER variable
+      - name: Set version variables
         run: |
           echo "Setting LLAMA_CPP_VER variable"
           source ./llama_cpp_version
@@ -108,7 +108,7 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v6
  
-      - name: Set LLAMA_CPP_VER variable
+      - name: Set version variables
         run: |
           echo "Setting LLAMA_CPP_VER variable"
           source ./llama_cpp_version
@@ -131,6 +131,6 @@ jobs:
         with:
           files: ./release/*
           body: |
-            `llama.cpp` (${LLAMA_CPP_VER}) compiled for Linux x86_64 with ROCm (${ROCM_VER}), optimized for AMD Strix Halo devices.
+            `llama.cpp` (${{ env.LLAMA_CPP_VER }}) compiled for Linux x86_64 with ROCm (${{ env.ROCM_VER }}), optimized for AMD Strix Halo devices.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
