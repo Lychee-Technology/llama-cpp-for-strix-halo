@@ -1,2 +1,2 @@
-LLAMA_CPP_VER=master-fff0e0e
+LLAMA_CPP_VER=b7760
 ROCM_VER="7.1.1"
