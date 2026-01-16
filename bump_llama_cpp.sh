@@ -77,17 +77,17 @@ cat llama_cpp_version
 
 # Commit the change
 echo -e "${YELLOW}Committing changes...${NC}"
-#git commit -am "bump llama.cpp to ${llama_cpp_tag}"
+git commit -am "bump llama.cpp to ${llama_cpp_tag}"
 
 # Push the commit
 echo -e "${YELLOW}Pushing commit...${NC}"
-#git push
+git push
 
 # Create and push the tag
 echo -e "${YELLOW}Creating tag ${llama_cpp_tag}...${NC}"
-#git tag "${llama_cpp_tag}"
+git tag "${llama_cpp_tag}"
 
 echo -e "${YELLOW}Pushing tag ${llama_cpp_tag}...${NC}"
-#git push origin "${llama_cpp_tag}"
+git push origin "${llama_cpp_tag}"
 
 echo -e "${GREEN}Done! Successfully bumped llama.cpp to ${llama_cpp_tag}${NC}"
