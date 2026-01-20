@@ -92,6 +92,7 @@ jobs:
           cmake -B build \
             -DCMAKE_BUILD_TYPE=Release \
             -DGGML_HIP=ON \
+            -DGGML_CPU_TARGET="znver5" \
             -DAMDGPU_TARGETS="gfx1151"
           cmake --build build -- -j$(nproc)
 
