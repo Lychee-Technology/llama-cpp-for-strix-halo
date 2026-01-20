@@ -87,7 +87,7 @@ jobs:
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 100
           gcc --version
           g++ --version
-          export CFLAGS="-O3 -march=znver5 -mtune=znver5 -flto"
+          export CFLAGS="-O3 -march=znver5 -mtune=znver5 -flto=auto"
           export CXXFLAGS="$CFLAGS"
           cmake -B build \
             -DCMAKE_BUILD_TYPE=Release \
