@@ -94,6 +94,7 @@ jobs:
             -DGGML_HIP=ON \
             -DGGML_NATIVE=OFF \
             -DGGML_CPU=OFF \
+            -DLLAMA_BUILD_TESTS=OFF \
             -DAMDGPU_TARGETS="gfx1151"
           cmake --build build -- -j$(nproc)
 
