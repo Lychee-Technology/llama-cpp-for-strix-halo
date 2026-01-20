@@ -80,6 +80,8 @@ jobs:
       - name: Configure and Build llama.cpp
         run: |
           cd llama.cpp
+          export CFLAGS="-O3 -march=znver5 -mtune=znver5 -flto"
+          export CXXFLAGS="$CFLAGS"
           cmake -B build \
             -DCMAKE_BUILD_TYPE=Release \
             -DGGML_HIP=ON \
