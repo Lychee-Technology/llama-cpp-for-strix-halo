@@ -92,6 +92,8 @@ jobs:
           cmake -B build \
             -DCMAKE_BUILD_TYPE=Release \
             -DGGML_HIP=ON \
+            -DGGML_NATIVE=OFF \
+            -DGGML_CPU=OFF \
             -DAMDGPU_TARGETS="gfx1151"
           cmake --build build -- -j$(nproc)
 
