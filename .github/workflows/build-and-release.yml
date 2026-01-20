@@ -29,12 +29,15 @@ jobs:
       # 2 Install CMake + build tools
       - name: Install build tools
         run: |
+          sudo add-apt-repository universe
+          sudo apt update
           sudo apt-get install -y \
             cmake \
             build-essential \
             ninja-build \
             ccache \
-            libcurl4-openssl-dev
+            libcurl4-openssl-dev \
+            gcc-14 g++-14
 
       # 3 Install ROCm dev packages for compile-time HIP support
       - name: Install ROCm / HIP development packages
@@ -80,6 +83,10 @@ jobs:
       - name: Configure and Build llama.cpp
         run: |
           cd llama.cpp
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 100
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 100
+          gcc --version
+          g++ --version
           export CFLAGS="-O3 -march=znver5 -mtune=znver5 -flto"
           export CXXFLAGS="$CFLAGS"
           cmake -B build \
