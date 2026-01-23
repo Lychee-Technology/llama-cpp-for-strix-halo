@@ -11,6 +11,12 @@ permissions:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        include:
+          - ROCM_VER: '7.1.1'
+          - ROCM_VER: '7.2.0'
+    
     name: Build with HIP support
     runs-on: blacksmith-2vcpu-ubuntu-2404
 
@@ -23,8 +29,8 @@ jobs:
         run: |
           echo "Setting LLAMA_CPP_VER variable"
           source ./llama_cpp_version
-          echo "LLAMA_CPP_VER=$LLAMA_CPP_VER" >> $GITHUB_ENV
-          echo "ROCM_VER=$ROCM_VER" >> $GITHUB_ENV
+          echo "LLAMA_CPP_VER=$LLAMA_CPP_VER" | tee $GITHUB_ENV
+          echo "ROCM_VER=${{ matrix.ROCM_VER }}" | tee $GITHUB_ENV
 
       # 2 Install CMake + build tools
       - name: Install build tools
