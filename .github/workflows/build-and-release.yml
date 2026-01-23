@@ -16,38 +16,16 @@ jobs:
         include:
           - ROCM_VER: '7.1.1'
             ROCM_INSTALL_SCRIPT: |
-              # Make the directory if it doesn't exist yet.
-              # This location is recommended by the distribution maintainers.
-              sudo mkdir --parents --mode=0755 /etc/apt/keyrings
-
-              # Download the key, convert the signing-key to a full
-              # keyring required by apt and store in the keyring directory
-              wget https://repo.radeon.com/rocm/rocm.gpg.key -O - | \
-                gpg --dearmor | sudo tee /etc/apt/keyrings/rocm.gpg > /dev/null
-
-              sudo tee /etc/apt/sources.list.d/rocm.list << EOF
-              deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/rocm/apt/${ROCM_VER} noble main
-              deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/graphics/${ROCM_VER}/ubuntu noble main
-              EOF
-
-              sudo tee /etc/apt/preferences.d/rocm-pin-600 << EOF
-              Package: *
-              Pin: release o=repo.radeon.com
-              Pin-Priority: 600
-              EOF
-
-              sudo apt-get update
-
-              sudo apt-get install -y \
-                rocm-hip-sdk \
-                rocm \
-                rocm-core \
-                rocm-cmake \
-                rocminfo
+              wget https://repo.radeon.com/amdgpu-install/7.1.1/ubuntu/noble/amdgpu-install_7.1.1.70101-1_all.deb -O amdgpu-install.deb
+              sudo apt install -y ./amdgpu-install.deb
+              sudo apt update
+              sudo apt install -y python3-setuptools python3-wheel
+              sudo usermod -a -G render,video $LOGNAME
+              sudo apt install -y rocm
           - ROCM_VER: '7.2.0'
             ROCM_INSTALL_SCRIPT: |
-              wget https://repo.radeon.com/amdgpu-install/7.2/ubuntu/noble/amdgpu-install_7.2.70200-1_all.deb
-              sudo apt install -y ./amdgpu-install_7.2.70200-1_all.deb
+              wget https://repo.radeon.com/amdgpu-install/7.2/ubuntu/noble/amdgpu-install_7.2.70200-1_all.deb -O amdgpu-install.deb
+              sudo apt install -y ./amdgpu-install.deb
               sudo apt update
               sudo apt install -y python3-setuptools python3-wheel
               sudo usermod -a -G render,video $LOGNAME
@@ -65,8 +43,9 @@ jobs:
         run: |
           echo "Setting LLAMA_CPP_VER variable"
           source ./llama_cpp_version
-          echo "LLAMA_CPP_VER=$LLAMA_CPP_VER" | tee $GITHUB_ENV
-          echo "ROCM_VER=${{ matrix.ROCM_VER }}" | tee $GITHUB_ENV
+          export "ROCM_VER=${{ matrix.ROCM_VER }}"
+          echo "LLAMA_CPP_VER=$LLAMA_CPP_VER" >> $GITHUB_ENV
+          echo "ROCM_VER=${{ matrix.ROCM_VER }}" >> tee $GITHUB_ENV
 
       # 2 Install CMake + build tools
       - name: Install build tools
