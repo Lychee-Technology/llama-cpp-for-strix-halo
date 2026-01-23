@@ -15,22 +15,10 @@ jobs:
       matrix:
         include:
           - ROCM_VER: '7.1.1'
-            ROCM_INSTALL_SCRIPT: |
-              wget https://repo.radeon.com/amdgpu-install/7.1.1/ubuntu/noble/amdgpu-install_7.1.1.70101-1_all.deb -O amdgpu-install.deb
-              sudo apt install -y ./amdgpu-install.deb
-              sudo apt update
-              sudo apt install -y python3-setuptools python3-wheel
-              sudo usermod -a -G render,video $LOGNAME
-              sudo apt install -y rocm
+            ROCM_INSTALLER_URL: https://repo.radeon.com/amdgpu-install/7.1.1/ubuntu/noble/amdgpu-install_7.1.1.70101-1_all.deb
           - ROCM_VER: '7.2.0'
-            ROCM_INSTALL_SCRIPT: |
-              wget https://repo.radeon.com/amdgpu-install/7.2/ubuntu/noble/amdgpu-install_7.2.70200-1_all.deb -O amdgpu-install.deb
-              sudo apt install -y ./amdgpu-install.deb
-              sudo apt update
-              sudo apt install -y python3-setuptools python3-wheel
-              sudo usermod -a -G render,video $LOGNAME
-              sudo apt install -y rocm
-    
+            ROCM_INSTALLER_URL: https://repo.radeon.com/amdgpu-install/7.2/ubuntu/noble/amdgpu-install_7.2.70200-1_all.deb
+
     name: Build with HIP support
     runs-on: blacksmith-2vcpu-ubuntu-2404
 
@@ -62,7 +50,14 @@ jobs:
 
       # 3 Install ROCm dev packages for compile-time HIP support
       - name: Install ROCm / HIP development packages
-        run: ${{ matrix.ROCM_INSTALL_SCRIPT }}
+        run: |
+          wget ${{ matrix.ROCM_INSTALLER_URL }} -O amdgpu-install.deb
+          sudo apt install -y ./amdgpu-install.deb
+          sudo apt update
+          sudo apt install -y python3-setuptools python3-wheel
+          sudo usermod -a -G render,video $LOGNAME
+          sudo apt install -y rocm
+        
 
       - name: Verify HIP compiler
         run: |
