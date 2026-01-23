@@ -33,7 +33,7 @@ jobs:
           source ./llama_cpp_version
           export "ROCM_VER=${{ matrix.ROCM_VER }}"
           echo "LLAMA_CPP_VER=$LLAMA_CPP_VER" >> $GITHUB_ENV
-          echo "ROCM_VER=${{ matrix.ROCM_VER }}" >> tee $GITHUB_ENV
+          echo "ROCM_VER=${{ matrix.ROCM_VER }}" >> $GITHUB_ENV
 
       # 2 Install CMake + build tools
       - name: Install build tools
@@ -96,7 +96,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: llama-cpp-strix-halo
+          name: llama-cpp-strix-halo-${{ matrix.ROCM_VER }}
           path: llama-cpp-*.tar.xz
           retention-days: 1
 
@@ -114,13 +114,13 @@ jobs:
           echo "Setting LLAMA_CPP_VER variable"
           source ./llama_cpp_version
           echo "LLAMA_CPP_VER=$LLAMA_CPP_VER" >> $GITHUB_ENV
-          echo "ROCM_VER=$ROCM_VER" >> $GITHUB_ENV
 
       - name: Download llama-cpp-strix-halo artifact
         uses: actions/download-artifact@v4
         with:
-          name: llama-cpp-strix-halo 
+          pattern: llama-cpp-strix-halo-*
           path: ./release
+          merge-multiple: true
       
       - name: List files
         run: |
@@ -132,6 +132,6 @@ jobs:
         with:
           files: ./release/*
           body: |
-            `llama.cpp` (${{ env.LLAMA_CPP_VER }}) compiled for Linux x86_64 with ROCm (${{ env.ROCM_VER }}), optimized for AMD Strix Halo devices.
+            `llama.cpp` (${{ env.LLAMA_CPP_VER }}) compiled for Linux x86_64 with ROCm, optimized for AMD Strix Halo devices.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
