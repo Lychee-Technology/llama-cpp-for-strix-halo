@@ -51,18 +51,21 @@ Add the following parameters to your kernel command line (for devices with 128GB
 
 With 4 KB pages, the above values allow **100+ GB of GPU-accessible memory**, which is critical for large LLM inference.
 
-### **How to Apply (GRUB Example)**
+### **How to Apply**
 
-Edit `/etc/default/grub`:
+Edit `/etc/modprobe.d/increase_amd_memory.conf`:
 
 Update:
 
-`GRUB_CMDLINE_LINUX_DEFAULT="quiet splash ttm.page_pool_size=25600000 ttm.pages_limit=25600000"`
+```
+options ttm pages_limit=25600000 #4k per page, 100GB total
+options ttm page_pool_size=25600000
+```
 
 Then apply and reboot:
 
 ```sh
-sudo update-grub  
+sudo update-initramfs -u -k all
 sudo reboot  
 ```
 
