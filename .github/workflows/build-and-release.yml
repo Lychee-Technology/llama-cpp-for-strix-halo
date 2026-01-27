@@ -116,7 +116,7 @@ jobs:
           echo "LLAMA_CPP_VER=$LLAMA_CPP_VER" >> $GITHUB_ENV
 
       - name: Download llama-cpp-strix-halo artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: llama-cpp-strix-halo-*
           path: ./release
