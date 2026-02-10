@@ -18,7 +18,7 @@ This repository exists to:
 
 * Provide **ready-to-use Linux builds of llama.cpp for Strix Halo**
 * Document **exact system tuning steps** required to unlock large-memory inference
-* Lower the barrier for running **70B–100B+ models locally** on AMD AI APUs
+* Lower the barrier for running **70B–120B+ models locally** on AMD AI APUs
 
 ## **Platform Overview: Strix Halo Memory Model**
 
