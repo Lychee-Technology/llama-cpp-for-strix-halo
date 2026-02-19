@@ -45,9 +45,8 @@ jobs:
             build-essential \
             ninja-build \
             ccache \
-            libcurl4-openssl-dev \
-            gcc-14 g++-14
-
+            libcurl4-openssl-dev 
+            
       # 3 Install ROCm dev packages for compile-time HIP support
       - name: Install ROCm / HIP development packages
         run: |
@@ -83,6 +82,14 @@ jobs:
             -DCMAKE_CXX_FLAGS="$CFLAGS" \
             -DGGML_HIP=ON \
             -DGGML_NATIVE=OFF \
+            -DGGML_AVX=ON \
+            -DGGML_AVX2=ON \
+            -DGGML_AVX512=ON \
+            -DGGML_AVX512_VBMI=ON \
+            -DGGML_AVX512_VNNI=ON \
+            -DGGML_BMI2=ON \
+            -DGGML_FMA=ON \
+            -DGGML_F16C=ON \
             -DLLAMA_BUILD_TESTS=OFF \
             -DLLAMA_BUILD_EXAMPLES=OFF \
             -DAMDGPU_TARGETS="gfx1151" \
