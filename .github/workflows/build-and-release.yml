@@ -72,14 +72,15 @@ jobs:
       - name: Configure and Build llama.cpp
         run: |
           cd llama.cpp
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 100
-          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 100
-          gcc --version
-          g++ --version
-          export CFLAGS="-O3 -march=znver5 -mtune=znver5 -flto=auto"
-          export CXXFLAGS="$CFLAGS"
+          export ROCM_PATH=/opt/rocm
+          export CFLAGS="-O3 -march=znver5 -mtune=znver5"
+
           cmake -B build \
             -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER="${ROCM_PATH}/lib/llvm/bin/clang" \
+            -DCMAKE_CXX_COMPILER="${ROCM_PATH}/lib/llvm/bin/clang++" \
+            -DCMAKE_C_FLAGS="$CFLAGS" \
+            -DCMAKE_CXX_FLAGS="$CFLAGS" \
             -DGGML_HIP=ON \
             -DGGML_NATIVE=OFF \
             -DLLAMA_BUILD_TESTS=OFF \
