@@ -72,12 +72,18 @@ jobs:
         run: |
           cd llama.cpp
           export ROCM_PATH=/opt/rocm
+          export LLVM_BIN="$(hipconfig -l)"
           export CFLAGS="-O3 -march=znver5 -mtune=znver5"
+          # Strix Halo / gfx1151 needs the ROCm 7.x unroll workaround, and issue #19984
+          # showed rocWMMA FATTN regresses badly on gfx115x.
+          export HIP_FLAGS="--rocm-path=${ROCM_PATH} -mllvm --amdgpu-unroll-threshold-local=600"
 
           cmake -B build \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_C_COMPILER="${ROCM_PATH}/lib/llvm/bin/clang" \
-            -DCMAKE_CXX_COMPILER="${ROCM_PATH}/lib/llvm/bin/clang++" \
+            -DCMAKE_C_COMPILER="${LLVM_BIN}/clang" \
+            -DCMAKE_CXX_COMPILER="${LLVM_BIN}/clang++" \
+            -DCMAKE_HIP_COMPILER="${LLVM_BIN}/clang" \
+            -DCMAKE_HIP_FLAGS="${HIP_FLAGS}" \
             -DCMAKE_C_FLAGS="$CFLAGS" \
             -DCMAKE_CXX_FLAGS="$CFLAGS" \
             -DGGML_HIP=ON \
@@ -90,11 +96,12 @@ jobs:
             -DGGML_BMI2=ON \
             -DGGML_FMA=ON \
             -DGGML_F16C=ON \
+            -DGGML_CUDA_FA_ALL_QUANTS=ON \
             -DLLAMA_BUILD_TESTS=OFF \
             -DLLAMA_BUILD_EXAMPLES=OFF \
+            -DGPU_TARGETS="gfx1151" \
             -DAMDGPU_TARGETS="gfx1151" \
-            -DGGML_HIP_ROCWMMA_FATTN=ON \
-            -DGGML_HIP_UMA=ON
+            -DGGML_HIP_ROCWMMA_FATTN=OFF
           cmake --build build -- -j$(nproc)
 
       # 6 Package compiled binaries
