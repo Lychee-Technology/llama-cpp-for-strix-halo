@@ -41,3 +41,4 @@
 *.dwo
 
 .DS_Store
+.claude/
