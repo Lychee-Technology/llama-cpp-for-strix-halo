@@ -19,8 +19,8 @@ jobs:
             INSTALL_METHOD: 'deb'
             GGML_HIP_UMA: 'OFF'
             GGML_HIP_ROCWMMA_FATTN: 'OFF'
-          - ROCM_VER: '7.13.0a20260417'
-            ROCM_INSTALLER_URL: https://therock-nightly-tarball.s3.amazonaws.com/therock-dist-linux-gfx1151-7.13.0a20260417.tar.gz
+          - ROCM_VER: '7.13-nightly'
+            ROCM_INSTALLER_URL: https://therock-nightly-tarball.s3.amazonaws.com/
             INSTALL_METHOD: 'tarball'
             GGML_HIP_UMA: 'ON'
             GGML_HIP_ROCWMMA_FATTN: 'ON'
@@ -37,8 +37,8 @@ jobs:
         run: |
           echo "Setting LLAMA_CPP_VER variable"
           source ./llama_cpp_version
-          export "ROCM_VER=${{ matrix.ROCM_VER }}"
           echo "LLAMA_CPP_VER=$LLAMA_CPP_VER" >> $GITHUB_ENV
+          echo "THEROCK_TARBALL_NAME=$THEROCK_TARBALL_NAME" >> $GITHUB_ENV
           echo "ROCM_VER=${{ matrix.ROCM_VER }}" >> $GITHUB_ENV
 
       # 2 Install CMake + build tools
@@ -68,7 +68,8 @@ jobs:
       - name: Install ROCm via therock tarball
         if: matrix.INSTALL_METHOD == 'tarball'
         run: |
-          wget ${{ matrix.ROCM_INSTALLER_URL }} -O therock.tar.gz
+          ROCM_TARBALL_URL="${{ matrix.ROCM_INSTALLER_URL }}${THEROCK_TARBALL_NAME}"
+          wget "$ROCM_TARBALL_URL" -O therock.tar.gz
           sudo mkdir -p /opt/rocm
           sudo tar -xzf therock.tar.gz -C /opt/rocm
           echo "/opt/rocm/bin" >> $GITHUB_PATH
