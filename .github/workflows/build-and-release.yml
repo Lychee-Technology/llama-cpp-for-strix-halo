@@ -16,6 +16,14 @@ jobs:
         include:
           - ROCM_VER: '7.2.2'
             ROCM_INSTALLER_URL: https://repo.radeon.com/amdgpu-install/7.2.2/ubuntu/noble/amdgpu-install_7.2.2.70202-1_all.deb
+            INSTALL_METHOD: 'deb'
+            GGML_HIP_UMA: 'OFF'
+            GGML_HIP_ROCWMMA_FATTN: 'OFF'
+          - ROCM_VER: '7.13.0a20260417'
+            ROCM_INSTALLER_URL: https://therock-nightly-tarball.s3.amazonaws.com/therock-dist-linux-gfx1151-7.13.0a20260417.tar.gz
+            INSTALL_METHOD: 'tarball'
+            GGML_HIP_UMA: 'ON'
+            GGML_HIP_ROCWMMA_FATTN: 'ON'
 
     name: Build with HIP support
     runs-on: blacksmith-2vcpu-ubuntu-2404
@@ -45,8 +53,9 @@ jobs:
             ccache \
             libcurl4-openssl-dev 
             
-      # 3 Install ROCm dev packages for compile-time HIP support
-      - name: Install ROCm / HIP development packages
+      # 3a Install ROCm via amdgpu-install deb (stable releases)
+      - name: Install ROCm via amdgpu-install (deb)
+        if: matrix.INSTALL_METHOD == 'deb'
         run: |
           wget ${{ matrix.ROCM_INSTALLER_URL }} -O amdgpu-install.deb
           sudo apt install -y ./amdgpu-install.deb
@@ -54,11 +63,24 @@ jobs:
           sudo apt install -y python3-setuptools python3-wheel
           sudo usermod -a -G render,video $LOGNAME
           sudo apt install -y rocm
-        
 
-      - name: Verify HIP compiler
+      # 3b Install ROCm via therock nightly tarball (beta releases)
+      - name: Install ROCm via therock tarball
+        if: matrix.INSTALL_METHOD == 'tarball'
         run: |
-          hipcc --version
+          wget ${{ matrix.ROCM_INSTALLER_URL }} -O therock.tar.gz
+          sudo mkdir -p /opt/rocm
+          sudo tar -xzf therock.tar.gz -C /opt/rocm
+          echo "/opt/rocm/bin" >> $GITHUB_PATH
+
+      - name: Detect ROCm installation structure
+        run: |
+          echo "=== /opt/rocm top-level ==="
+          ls /opt/rocm/
+          echo "=== LLVM bin path (hipconfig -l) ==="
+          /opt/rocm/bin/hipconfig -l || true
+          echo "=== hipcc version ==="
+          /opt/rocm/bin/hipcc --version
 
       # 4 Clone the official llama.cpp repo
       - name: Clone llama.cpp
@@ -99,7 +121,8 @@ jobs:
             -DLLAMA_BUILD_EXAMPLES=OFF \
             -DGPU_TARGETS="gfx1151" \
             -DAMDGPU_TARGETS="gfx1151" \
-            -DGGML_HIP_ROCWMMA_FATTN=OFF
+            -DGGML_HIP_UMA=${{ matrix.GGML_HIP_UMA }} \
+            -DGGML_HIP_ROCWMMA_FATTN=${{ matrix.GGML_HIP_ROCWMMA_FATTN }}
           cmake --build build -- -j$(nproc)
 
       # 6 Package compiled binaries
