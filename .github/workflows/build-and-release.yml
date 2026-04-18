@@ -153,6 +153,7 @@ jobs:
           echo "Setting LLAMA_CPP_VER variable"
           source ./llama_cpp_version
           echo "LLAMA_CPP_VER=$LLAMA_CPP_VER" >> $GITHUB_ENV
+          echo "THEROCK_TARBALL_NAME=$THEROCK_TARBALL_NAME" >> $GITHUB_ENV
 
       - name: Download llama-cpp-strix-halo artifact
         uses: actions/download-artifact@v7
@@ -171,6 +172,6 @@ jobs:
         with:
           files: ./release/*
           body: |
-            `llama.cpp` (${{ env.LLAMA_CPP_VER }}) compiled for Linux x86_64 with ROCm ( ${{ env.THEROCK_TARBALL_NAME }} and  ${{ env.ROCM_VER }} ), optimized for AMD Strix Halo devices.
+            `llama.cpp` (${{ env.LLAMA_CPP_VER }}) compiled for Linux x86_64 with ROCm, optimized for AMD Strix Halo devices. Includes support for ROCm 7.2.1 and 7.13-nightly (${{ env.THEROCK_TARBALL_NAME }}), with HIP optimizations for gfx1151.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
