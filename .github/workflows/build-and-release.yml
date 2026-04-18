@@ -171,6 +171,6 @@ jobs:
         with:
           files: ./release/*
           body: |
-            `llama.cpp` (${{ env.LLAMA_CPP_VER }}) compiled for Linux x86_64 with ROCm, optimized for AMD Strix Halo devices.
+            `llama.cpp` (${{ env.LLAMA_CPP_VER }}) compiled for Linux x86_64 with ROCm ( ${{ env.THEROCK_TARBALL_NAME }} and  ${{ env.ROCM_VER }} ), optimized for AMD Strix Halo devices.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
