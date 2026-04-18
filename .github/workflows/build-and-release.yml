@@ -69,7 +69,7 @@ jobs:
         if: matrix.INSTALL_METHOD == 'tarball'
         run: |
           ROCM_TARBALL_URL="${{ matrix.ROCM_INSTALLER_URL }}${THEROCK_TARBALL_NAME}"
-          wget "$ROCM_TARBALL_URL" -O therock.tar.gz
+          wget -q "$ROCM_TARBALL_URL" -O therock.tar.gz
           sudo mkdir -p /opt/rocm
           sudo tar -xzf therock.tar.gz -C /opt/rocm
           echo "/opt/rocm/bin" >> $GITHUB_PATH
