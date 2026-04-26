@@ -14,8 +14,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - ROCM_VER: '7.2.1'
-            ROCM_INSTALLER_URL: https://repo.radeon.com/amdgpu-install/7.2.1/ubuntu/noble/amdgpu-install_7.2.1.70201-1_all.deb
+          - ROCM_VER: '7.2.2'
+            ROCM_INSTALLER_URL: https://repo.radeon.com/amdgpu-install/7.2.2/ubuntu/noble/amdgpu-install_7.2.2.70202-1_all.deb
             INSTALL_METHOD: 'deb'
             GGML_HIP_UMA: 'OFF'
             GGML_HIP_ROCWMMA_FATTN: 'OFF'
