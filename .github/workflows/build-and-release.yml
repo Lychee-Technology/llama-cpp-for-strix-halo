@@ -59,6 +59,7 @@ jobs:
         run: |
           wget ${{ matrix.ROCM_INSTALLER_URL }} -O amdgpu-install.deb
           sudo apt install -y ./amdgpu-install.deb
+          sudo sed -i "s|graphics/7.2.2|graphics/7.2.1|" /etc/apt/sources.list.d/rocm.list
           sudo apt update
           sudo apt install -y python3-setuptools python3-wheel
           sudo usermod -a -G render,video $LOGNAME
