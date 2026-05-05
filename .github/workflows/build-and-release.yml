@@ -14,8 +14,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - ROCM_VER: '7.2.2'
-            ROCM_INSTALLER_URL: https://repo.radeon.com/amdgpu-install/7.2.2/ubuntu/noble/amdgpu-install_7.2.2.70202-1_all.deb
+          - ROCM_VER: '7.2.3'
+            ROCM_INSTALLER_URL: https://repo.radeon.com/amdgpu-install/7.2.3/ubuntu/noble/amdgpu-install_7.2.3.70203-1_all.deb
             INSTALL_METHOD: 'deb'
             GGML_HIP_UMA: 'OFF'
             GGML_HIP_ROCWMMA_FATTN: 'OFF'
@@ -59,7 +59,6 @@ jobs:
         run: |
           wget ${{ matrix.ROCM_INSTALLER_URL }} -O amdgpu-install.deb
           sudo apt install -y ./amdgpu-install.deb
-          sudo sed -i "s|graphics/7.2.2|graphics/7.2.1|" /etc/apt/sources.list.d/rocm.list
           sudo apt update
           sudo apt install -y python3-setuptools python3-wheel
           sudo usermod -a -G render,video $LOGNAME
