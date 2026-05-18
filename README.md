@@ -75,7 +75,7 @@ These values are conservative but proven stable on Strix Halo with 128GB memory.
 
 `llama.cpp` on Strix Halo relies on **ROCm** for GPU acceleration.
 
-Follow AMD’s official [ROCm instructions](https://rocm.docs.amd.com/projects/install-on-linux/en/docs-7.2.3/install/install-methods/package-manager-index.html)
+Follow AMD’s official [ROCm instructions](https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/install-methods/package-manager-index.html)
 
 
 ## **Acknowledgements**
