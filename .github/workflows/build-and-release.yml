@@ -79,6 +79,8 @@ jobs:
         if: matrix.INSTALL_METHOD == 'runfile'
         run: |
           wget -q "${{ matrix.ROCM_INSTALLER_URL }}" -O rocm-installer.run
+          # The runfile installer requires the target dir to already exist.
+          sudo mkdir -p /opt/rocm
           # CI compile-only: install ROCm core + dev libraries + dev tools (compiler),
           # target only gfx1151, and do NOT install the amdgpu kernel driver.
           sudo bash rocm-installer.run \
