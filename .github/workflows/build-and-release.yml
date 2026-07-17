@@ -19,11 +19,11 @@ jobs:
             INSTALL_METHOD: 'deb'
             GGML_HIP_UMA: 'OFF'
             GGML_HIP_ROCWMMA_FATTN: 'OFF'
-          - ROCM_VER: '7.14-nightly'
-            ROCM_INSTALLER_URL: https://therock-nightly-tarball.s3.amazonaws.com/
-            INSTALL_METHOD: 'tarball'
+          - ROCM_VER: '7.14.0'
+            ROCM_INSTALLER_URL: https://repo.radeon.com/rocm/installer/rocm-runfile-installer/rocm-rel-7.14/rocm-installer-7.14.0-6.run
+            INSTALL_METHOD: 'runfile'
             GGML_HIP_UMA: 'ON'
-            GGML_HIP_ROCWMMA_FATTN: 'ON'
+            GGML_HIP_ROCWMMA_FATTN: 'OFF'
 
     name: Build with HIP support
     runs-on: blacksmith-2vcpu-ubuntu-2404
@@ -72,6 +72,22 @@ jobs:
           wget -q "$ROCM_TARBALL_URL" -O therock.tar.gz
           sudo mkdir -p /opt/rocm
           sudo tar -xzf therock.tar.gz -C /opt/rocm
+          echo "/opt/rocm/bin" >> $GITHUB_PATH
+
+      # 3c Install ROCm via the AMD runfile installer (compile-only, gfx1151-only)
+      - name: Install ROCm via runfile installer
+        if: matrix.INSTALL_METHOD == 'runfile'
+        run: |
+          wget -q "${{ matrix.ROCM_INSTALLER_URL }}" -O rocm-installer.run
+          # CI compile-only: install ROCm core + dev libraries + dev tools (compiler),
+          # target only gfx1151, and do NOT install the amdgpu kernel driver.
+          sudo bash rocm-installer.run \
+            compo=core,core-dev,dev-tools \
+            gfx=gfx1151 \
+            rocm \
+            deps=install \
+            target=/opt/rocm \
+            nopostrocm
           echo "/opt/rocm/bin" >> $GITHUB_PATH
 
       - name: Detect ROCm installation structure
