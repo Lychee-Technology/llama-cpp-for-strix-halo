@@ -79,17 +79,30 @@ jobs:
         if: matrix.INSTALL_METHOD == 'runfile'
         run: |
           wget -q "${{ matrix.ROCM_INSTALLER_URL }}" -O rocm-installer.run
-          # The runfile installer requires the target dir to already exist.
-          sudo mkdir -p /opt/rocm
+          # The installer requires its target base dir to pre-exist and extracts
+          # into <target>/rocm/core-<ver>, so install into a scratch base rather
+          # than straight to /opt/rocm.
+          sudo mkdir -p /opt/rocm-dist
           # CI compile-only: install ROCm core + dev libraries + dev tools (compiler),
-          # target only gfx1151, and do NOT install the amdgpu kernel driver.
+          # target only gfx1151, do NOT install the amdgpu kernel driver, and run
+          # post-install (postrocm) so the internal symlinks/library config are set up.
           sudo bash rocm-installer.run \
             compo=core,core-dev,dev-tools \
             gfx=gfx1151 \
             rocm \
             deps=install \
-            target=/opt/rocm \
-            nopostrocm
+            target=/opt/rocm-dist \
+            postrocm
+          # Point the standard /opt/rocm path (used by the shared build steps) at the
+          # versioned tree the installer produced (e.g. /opt/rocm-dist/rocm/core-7.14).
+          ROCM_ROOT="$(dirname "$(dirname "$(sudo find /opt/rocm-dist -type f -name hipcc | head -1)")")"
+          if [ -z "$ROCM_ROOT" ]; then
+            echo "ERROR: hipcc not found under /opt/rocm-dist after install; tree was:"
+            find /opt/rocm-dist -maxdepth 3 -type d | sort
+            exit 1
+          fi
+          echo "Discovered ROCm root: $ROCM_ROOT"
+          sudo ln -sfn "$ROCM_ROOT" /opt/rocm
           echo "/opt/rocm/bin" >> $GITHUB_PATH
 
       - name: Detect ROCm installation structure
