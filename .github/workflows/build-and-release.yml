@@ -20,8 +20,8 @@ jobs:
             GGML_HIP_UMA: 'OFF'
             GGML_HIP_ROCWMMA_FATTN: 'OFF'
           - ROCM_VER: '7.14.0'
-            ROCM_INSTALLER_URL: https://repo.radeon.com/amdgpu-install/31.40.1/ubuntu/resolute/amdgpu-install_31.40.1.314001-1_all.deb
-            INSTALL_METHOD: 'deb'
+            ROCM_INSTALLER_URL: wget https://repo.radeon.com/rocm/installer/rocm-runfile-installer/rocm-rel-7.14/rocm-installer-7.14.0-7.run
+            INSTALL_METHOD: 'runfile'
             GGML_HIP_UMA: 'ON'
             GGML_HIP_ROCWMMA_FATTN: 'OFF'
 
