@@ -7,24 +7,6 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-ROCM_7_14_TARBALL_VAR="THEROCK_TARBALL_NAME"
-
-extract_latest_rocm_714_tarball() {
-    local index_html="${1}"
-
-    printf '%s' "${index_html}" | \
-        grep -oE 'therock-dist-linux-gfx1151-7\.14[^"]+\.tar\.gz' | \
-        sort -V | \
-        tail -n 1
-}
-
-build_rocm_tarball_url() {
-    local base_url="${1%/}"
-    local tarball_name="${2}"
-
-    printf '%s\n' "${base_url}/${tarball_name}"
-}
-
 get_version_value() {
     local key="${1}"
 
@@ -46,19 +28,9 @@ fetch_latest_llama_cpp_tag() {
     curl -s "https://api.github.com/repos/ggml-org/llama.cpp/releases" | jq -r '.[].tag_name' | head -n 1
 }
 
-fetch_latest_rocm_714_tarball() {
-    local index_html
-
-    index_html="$(curl -s "https://therock-nightly-tarball.s3.amazonaws.com/index.html")"
-    extract_latest_rocm_714_tarball "${index_html}"
-}
-
 main() {
     local llama_cpp_tag
-    local rocm_714_tarball
-    local rocm_714_tarball_url
     local current_llama_cpp_ver
-    local current_rocm_714_tarball
     local current_branch
     local uncommitted
     local unpushed
@@ -103,20 +75,9 @@ main() {
     fi
     echo -e "${GREEN}Latest llama.cpp tag: ${llama_cpp_tag}${NC}"
 
-    echo -e "${YELLOW}Fetching latest ROCm 7.14 tarball...${NC}"
-    rocm_714_tarball="$(fetch_latest_rocm_714_tarball)"
-    if [ -z "${rocm_714_tarball}" ]; then
-        echo -e "${RED}Error: Failed to fetch latest ROCm 7.14 tarball${NC}"
-        exit 1
-    fi
-    rocm_714_tarball_url="$(build_rocm_tarball_url "https://therock-nightly-tarball.s3.amazonaws.com/" "${rocm_714_tarball}")"
-    echo -e "${GREEN}Latest ROCm 7.14 tarball: ${rocm_714_tarball}${NC}"
-    echo -e "${GREEN}ROCm 7.14 tarball URL: ${rocm_714_tarball_url}${NC}"
-
     current_llama_cpp_ver="$(get_version_value "LLAMA_CPP_VER")"
-    current_rocm_714_tarball="$(get_version_value "${ROCM_7_14_TARBALL_VAR}" || get_version_value "ROCM_7_14_TARBALL" || true)"
 
-    if [ "${current_llama_cpp_ver}" = "${llama_cpp_tag}" ] && [ "${current_rocm_714_tarball}" = "${rocm_714_tarball}" ]; then
+    if [ "${current_llama_cpp_ver}" = "${llama_cpp_tag}" ]; then
         echo -e "${YELLOW}llama_cpp_version is already up to date. Nothing to do.${NC}"
         exit 0
     fi
@@ -128,19 +89,12 @@ main() {
 
     echo -e "${YELLOW}Updating llama_cpp_version file...${NC}"
     upsert_version_value "LLAMA_CPP_VER" "${llama_cpp_tag}"
-    upsert_version_value "${ROCM_7_14_TARBALL_VAR}" "${rocm_714_tarball}"
     rm -f llama_cpp_version.bak
 
     echo -e "${GREEN}Updated llama_cpp_version:${NC}"
     cat llama_cpp_version
 
-    if [ "${current_llama_cpp_ver}" != "${llama_cpp_tag}" ] && [ "${current_rocm_714_tarball}" != "${rocm_714_tarball}" ]; then
-        commit_message="bump llama.cpp to ${llama_cpp_tag} and ROCm 7.14 tarball to ${rocm_714_tarball}"
-    elif [ "${current_llama_cpp_ver}" != "${llama_cpp_tag}" ]; then
-        commit_message="bump llama.cpp to ${llama_cpp_tag}"
-    else
-        commit_message="bump ROCm 7.14 tarball to ${rocm_714_tarball}"
-    fi
+    commit_message="bump llama.cpp to ${llama_cpp_tag}"
 
     echo -e "${YELLOW}Committing changes...${NC}"
     git commit -am "${commit_message}"

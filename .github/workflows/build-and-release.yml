@@ -24,6 +24,11 @@ jobs:
             INSTALL_METHOD: 'runfile'
             GGML_HIP_UMA: 'ON'
             GGML_HIP_ROCWMMA_FATTN: 'OFF'
+          - ROCM_VER: '10.0.0'
+            ROCM_INSTALLER_URL: https://repo.radeon.com/rocm/installer/rocm-runfile-installer/rocm-rel-10.0/rocm-installer-10.0.0-4.run
+            INSTALL_METHOD: 'runfile'
+            GGML_HIP_UMA: 'ON'
+            GGML_HIP_ROCWMMA_FATTN: 'OFF'
 
     name: Build with HIP support
     runs-on: blacksmith-2vcpu-ubuntu-2404
@@ -38,7 +43,6 @@ jobs:
           echo "Setting LLAMA_CPP_VER variable"
           source ./llama_cpp_version
           echo "LLAMA_CPP_VER=$LLAMA_CPP_VER" >> $GITHUB_ENV
-          echo "THEROCK_TARBALL_NAME=$THEROCK_TARBALL_NAME" >> $GITHUB_ENV
           echo "ROCM_VER=${{ matrix.ROCM_VER }}" >> $GITHUB_ENV
 
       # 2 Install CMake + build tools
@@ -63,16 +67,6 @@ jobs:
           sudo apt install -y python3-setuptools python3-wheel
           sudo usermod -a -G render,video $LOGNAME
           sudo apt install -y rocm
-
-      # 3b Install ROCm via therock nightly tarball (beta releases)
-      - name: Install ROCm via therock tarball
-        if: matrix.INSTALL_METHOD == 'tarball'
-        run: |
-          ROCM_TARBALL_URL="${{ matrix.ROCM_INSTALLER_URL }}${THEROCK_TARBALL_NAME}"
-          wget -q "$ROCM_TARBALL_URL" -O therock.tar.gz
-          sudo mkdir -p /opt/rocm
-          sudo tar -xzf therock.tar.gz -C /opt/rocm
-          echo "/opt/rocm/bin" >> $GITHUB_PATH
 
       # 3c Install ROCm via the AMD runfile installer (compile-only, gfx1151-only)
       - name: Install ROCm via runfile installer
@@ -184,7 +178,6 @@ jobs:
           echo "Setting LLAMA_CPP_VER variable"
           source ./llama_cpp_version
           echo "LLAMA_CPP_VER=$LLAMA_CPP_VER" >> $GITHUB_ENV
-          echo "THEROCK_TARBALL_NAME=$THEROCK_TARBALL_NAME" >> $GITHUB_ENV
 
       - name: Download llama-cpp-strix-halo artifact
         uses: actions/download-artifact@v7
@@ -203,6 +196,6 @@ jobs:
         with:
           files: ./release/*
           body: |
-            [llama.cpp ${{ env.LLAMA_CPP_VER }}](https://github.com/ggml-org/llama.cpp/releases/tag/${{ env.LLAMA_CPP_VER }}) compiled for Linux x86_64 with ROCm, optimized for AMD Strix Halo devices. Includes support for ROCm 7.2.4 and 7.14.0, with HIP optimizations for gfx1151.
+            [llama.cpp ${{ env.LLAMA_CPP_VER }}](https://github.com/ggml-org/llama.cpp/releases/tag/${{ env.LLAMA_CPP_VER }}) compiled for Linux x86_64 with ROCm, optimized for AMD Strix Halo devices. Includes support for ROCm 7.2.4, 7.14.0, and 10.0.0, with HIP optimizations for gfx1151.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
