@@ -24,6 +24,11 @@ jobs:
             INSTALL_METHOD: 'runfile'
             GGML_HIP_UMA: 'ON'
             GGML_HIP_ROCWMMA_FATTN: 'OFF'
+          - ROCM_VER: '10.0.0'
+            ROCM_INSTALLER_URL: https://repo.radeon.com/rocm/installer/rocm-runfile-installer/rocm-rel-10.0/rocm-installer-10.0.0-4.run
+            INSTALL_METHOD: 'runfile'
+            GGML_HIP_UMA: 'ON'
+            GGML_HIP_ROCWMMA_FATTN: 'OFF'
 
     name: Build with HIP support
     runs-on: blacksmith-2vcpu-ubuntu-2404
@@ -203,6 +208,6 @@ jobs:
         with:
           files: ./release/*
           body: |
-            [llama.cpp ${{ env.LLAMA_CPP_VER }}](https://github.com/ggml-org/llama.cpp/releases/tag/${{ env.LLAMA_CPP_VER }}) compiled for Linux x86_64 with ROCm, optimized for AMD Strix Halo devices. Includes support for ROCm 7.2.4 and 7.14.0, with HIP optimizations for gfx1151.
+            [llama.cpp ${{ env.LLAMA_CPP_VER }}](https://github.com/ggml-org/llama.cpp/releases/tag/${{ env.LLAMA_CPP_VER }}) compiled for Linux x86_64 with ROCm, optimized for AMD Strix Halo devices. Includes support for ROCm 7.2.4, 7.14.0, and 10.0.0, with HIP optimizations for gfx1151.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
