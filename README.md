@@ -69,7 +69,7 @@ When this repository was created in January 2026, `llama.cpp` was one of the few
 
 ### Compatibility Matrix
 
-The CI workflow runs **compile-only builds** on cloud runners without Strix Halo hardware; runtime execution depends on your host kernel and ROCm installation.
+The CI workflow builds on cloud runners without Strix Halo hardware. Before publication, each archive is [validated](docs/release-validation.md) for completeness, ELF architecture, and shared-library resolution against the matching ROCm version. GPU execution is not tested in CI and depends on your host kernel and ROCm installation.
 
 | Component | Target / Build Configuration | Verification Status | Notes |
 |---|---|---|---|
@@ -162,6 +162,7 @@ If `/opt/rocm` is installed at a versioned path (e.g., `/opt/rocm-10.2.0/lib` or
 | **[Troubleshooting](docs/troubleshooting.md)** | Diagnosing shared library, device detection, CPU fallback, and memory issues |
 | **[Build from Source](docs/build-from-source.md)** | Reproducing the CI build locally from pinned upstream tags |
 | **[Release Pipeline and Versioning](docs/release-pipeline.md)** | Upstream tracking (`bump_llama_cpp.sh`), GitHub Actions matrix, and verification scope |
+| **[Release Validation](docs/release-validation.md)** | Distribution contract, artifact checks, release gate, and validation evidence |
 | **[Repository Structure](docs/repository-structure.md)** | Overview of tracked scripts, workflows, and documentation files |
 
 ---
