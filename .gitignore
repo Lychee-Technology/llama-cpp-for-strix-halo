@@ -44,3 +44,4 @@
 .claude/
 .worktrees/
 docs/superpowers/
+__pycache__/
