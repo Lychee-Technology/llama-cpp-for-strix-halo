@@ -156,7 +156,38 @@ jobs:
         run: |
           tar -cJf llama-cpp-${LLAMA_CPP_VER}-rocm-${ROCM_VER}-gfx1151.tar.xz -C llama.cpp/build/bin .
 
-      # 7 Upload the built artifacts
+      # 7 Validate the packaged archive against the distribution contract
+      #   (docs/release-validation.md). A failure here stops the archive from
+      #   being uploaded, so it can never reach the release job.
+      - name: Validate artifact
+        run: |
+          ARCHIVE="llama-cpp-${LLAMA_CPP_VER}-rocm-${ROCM_VER}-gfx1151.tar.xz"
+          # The binaries record the build tree in DT_RPATH/DT_RUNPATH, and DT_RPATH
+          # wins over LD_LIBRARY_PATH. Remove the tree so the loader check can only
+          # resolve bundled libraries from the extracted archive.
+          rm -rf llama.cpp/build
+          ROCM_DETECTED="$(cat /opt/rocm/.info/version 2>/dev/null || /opt/rocm/bin/hipconfig --version 2>/dev/null || echo unknown)"
+          python3 ci/validate_artifact.py validate \
+            --contract ci/artifact-contract.json \
+            --archive "${ARCHIVE}" \
+            --upstream-tag "${LLAMA_CPP_VER}" \
+            --rocm-variant "${ROCM_VER}" \
+            --rocm-root /opt/rocm \
+            --rocm-version-detected "${ROCM_DETECTED}" \
+            --report "validation/${ARCHIVE}.validation.json" \
+            --markdown "${GITHUB_STEP_SUMMARY}"
+
+      # 8 Keep the machine-readable validation evidence, also for failed runs
+      - name: Upload validation report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: validation-report-${{ matrix.ROCM_VER }}
+          path: validation/*.json
+          if-no-files-found: warn
+          retention-days: 90
+
+      # 9 Upload the built artifacts
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
@@ -164,11 +195,12 @@ jobs:
           path: llama-cpp-*.tar.xz
           retention-days: 1
 
+  # Runs for every build so the release gate is exercised on workflow_dispatch
+  # too; only tag builds publish a GitHub Release.
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: github.ref_type == 'tag'
-    
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v6
@@ -186,12 +218,44 @@ jobs:
           path: ./release
           merge-multiple: true
       
+      - name: Download validation reports
+        uses: actions/download-artifact@v7
+        with:
+          pattern: validation-report-*
+          path: ./validation
+          merge-multiple: true
+
       - name: List files
         run: |
           echo "Files to be released:"
           ls -lh ./release/
-      
+          echo "Validation reports:"
+          ls -lh ./validation/
+
+      # Refuse to publish unless every expected ROCm variant is present, nothing
+      # else is in ./release, and each archive has a passing validation report
+      # bound to its exact bytes (sha256) and to the current contract.
+      - name: Gate release on validation evidence
+        run: |
+          python3 ci/validate_artifact.py gate \
+            --contract ci/artifact-contract.json \
+            --upstream-tag "${LLAMA_CPP_VER}" \
+            --archives-dir ./release \
+            --reports-dir ./validation \
+            --summary ./validation/release-gate.json \
+            --markdown "${GITHUB_STEP_SUMMARY}"
+
+      - name: Upload release gate summary
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-gate
+          path: validation/release-gate.json
+          if-no-files-found: warn
+          retention-days: 90
+
       - name: Create GitHub Release
+        if: github.ref_type == 'tag'
         uses: softprops/action-gh-release@v3
         with:
           files: ./release/*
