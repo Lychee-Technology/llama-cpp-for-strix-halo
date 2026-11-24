@@ -562,9 +562,16 @@ def ldconfig_dirs() -> set:
             continue
         for line in output.splitlines():
             if "=>" in line:
-                dirs.add(os.path.realpath(os.path.dirname(line.split("=>", 1)[1].strip())))
+                dirs.add(os.path.dirname(line.split("=>", 1)[1].strip()))
         break
     return dirs
+
+
+def is_under(path: str, roots) -> bool:
+    """Lexical prefix test on the path exactly as the loader printed it."""
+    path = os.path.normpath(path)
+    return any(path == os.path.normpath(root) or path.startswith(os.path.normpath(root) + os.sep)
+               for root in roots)
 
 
 def check_loader_resolution(contract, archive: Archive, rocm_root, unavailable) -> Check:
@@ -578,8 +585,12 @@ def check_loader_resolution(contract, archive: Archive, rocm_root, unavailable) 
     timeout = contract["runtime"]["loader_timeout_seconds"]
     interpreter = contract["elf"]["interpreter"]
     archive_real = os.path.realpath(archive.root)
-    documented_dirs = {os.path.realpath(p) for p in library_path}
-    system_dirs = {os.path.realpath(p) for p in SYSTEM_LIBRARY_DIRS} | ldconfig_dirs()
+    # Locations a user host is expected to provide: the documented search path,
+    # the ROCm installation (whose own libraries use $ORIGIN-relative RUNPATHs),
+    # and the system library directories. Anything else was only reachable
+    # through a search-path entry baked in on the build host.
+    expected_roots = [*library_path, *([rocm_root] if rocm_root else []),
+                      *SYSTEM_LIBRARY_DIRS, *ldconfig_dirs()]
 
     problems = []
     resolved_external = {}
@@ -612,7 +623,7 @@ def check_loader_resolution(contract, archive: Archive, rocm_root, unavailable) 
             if inside:
                 continue
             resolved_external.setdefault(lib, target)
-            if real_dir not in documented_dirs and real_dir not in system_dirs:
+            if not is_under(target, expected_roots):
                 via_build_paths.setdefault(lib, target)
 
     details = {

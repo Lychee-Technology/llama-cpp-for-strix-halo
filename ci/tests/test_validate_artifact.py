@@ -415,6 +415,14 @@ class ResultTests(TempDirTestCase):
         self.assertIn("not x86_64", va.runtime_unavailable_reason(
             self.contract, {"system": "Linux", "machine": "aarch64"}, False))
 
+    def test_is_under_uses_the_printed_path(self):
+        roots = ["/tmp/x", "/opt/rocm", "/usr/lib"]
+        self.assertTrue(va.is_under("/opt/rocm/lib/rocm_sysdeps/lib/libz.so.1", roots))
+        self.assertTrue(va.is_under("/usr/lib/x86_64-linux-gnu/libc.so.6", roots))
+        # /opt/rocm may be a symlink to this tree, but the loader reached it via DT_RPATH.
+        self.assertFalse(va.is_under("/opt/rocm-dist/rocm/core-10.2/lib/llvm/lib/libomp.so", roots))
+        self.assertFalse(va.is_under("/tmp/xy/libfoo.so", roots))
+
     def test_parse_loader_listing(self):
         output = textwrap.dedent("""\
             \tlinux-vdso.so.1 (0x00007ffd5a9f2000)
