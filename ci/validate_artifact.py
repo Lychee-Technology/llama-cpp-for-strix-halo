@@ -571,7 +571,10 @@ def check_loader_resolution(contract, archive: Archive, rocm_root, unavailable) 
     if unavailable:
         return Check("loader-resolution", True, NOT_RUN, unavailable, {})
     library_path = runtime_library_path(contract, archive.root, rocm_root)
-    env = runtime_env(library_path)
+    # Trace mode, as used by ldd: the loader maps every dependency, prints where
+    # each one resolved (or "not found") and exits before running any code.
+    # Unlike `ld.so --list`, it keeps going after the first missing library.
+    env = dict(runtime_env(library_path), LD_TRACE_LOADED_OBJECTS="1")
     timeout = contract["runtime"]["loader_timeout_seconds"]
     interpreter = contract["elf"]["interpreter"]
     archive_real = os.path.realpath(archive.root)
@@ -584,7 +587,7 @@ def check_loader_resolution(contract, archive: Archive, rocm_root, unavailable) 
     for name in sorted(archive.elves):
         path = os.path.join(archive.root, name)
         try:
-            proc = subprocess.run([interpreter, "--list", path], cwd=archive.root, env=env,
+            proc = subprocess.run([interpreter, path], cwd=archive.root, env=env,
                                   capture_output=True, text=True, timeout=timeout,
                                   stdin=subprocess.DEVNULL, check=False)
         except (OSError, subprocess.TimeoutExpired) as exc:
