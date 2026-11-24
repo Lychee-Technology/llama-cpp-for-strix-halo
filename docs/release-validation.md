@@ -40,7 +40,7 @@ Any other executables and libraries are recorded in the report's inventory but a
 | `elf-architecture` | static | yes | Every ELF file parses and matches the contract's class, byte order, machine and interpreter, and is `EXEC` or `DYN` |
 | `dependency-closure` | static | yes | Every `DT_NEEDED` entry is either bundled (with a matching SONAME) or an allowed external library |
 | `required-linkage` | static | yes | The `required_linkage` rules hold |
-| `rpath-portability` | static | advisory | Reports `DT_RPATH`/`DT_RUNPATH` entries that only exist on the build host (and empty entries, which search the current directory), plus external libraries the loader found only through such entries. Status `warn` never blocks a release |
+| `rpath-portability` | static | advisory | Reports `DT_RPATH`/`DT_RUNPATH` entries that only exist on the build host (and empty entries, which search the current directory), plus external libraries the loader found only through such entries. Status `warn` never blocks a release. Current builds warn: see [#13](https://github.com/Lychee-Technology/llama-cpp-for-strix-halo/issues/13) |
 | `loader-resolution` | runtime | yes | In the matching runtime environment, the dynamic loader resolves every dependency of every ELF file, and bundled libraries resolve to the extracted copies, not to some other location on the host |
 | `startup` | runtime | no | Runs `llama-cli --version`, `llama-server --version` and `llama-bench --help` with a timeout. Each must exit 0 |
 
