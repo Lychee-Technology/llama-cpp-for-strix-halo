@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "description": "Distribution contract for llama.cpp Strix Halo (gfx1151) release archives. See docs/release-validation.md.",
+  "archive_name_template": "llama-cpp-{upstream_tag}-rocm-{rocm_variant}-gfx1151.tar.xz",
+  "upstream_tag_pattern": "^(b[0-9]+|v[0-9][0-9A-Za-z.+-]*)$",
+  "rocm_variants": ["7.14.1", "10.1.0", "10.2.0"],
+  "elf": {
+    "class": "ELF64",
+    "byte_order": "little",
+    "machine": "x86_64",
+    "interpreter": "/lib64/ld-linux-x86-64.so.2"
+  },
+  "required_executables": ["llama-cli", "llama-server", "llama-bench"],
+  "required_libraries": ["libllama", "libggml", "libggml-base", "libggml-cpu", "libggml-hip"],
+  "required_linkage": [
+    {
+      "library": "libggml-hip",
+      "needs_pattern": "^libamdhip64\\.so(\\.[0-9]+)*$",
+      "reason": "the HIP backend must link the ROCm HIP runtime"
+    }
+  ],
+  "external_dependencies": [
+    {
+      "provided_by": "glibc",
+      "patterns": ["^libc\\.so\\.6$", "^libm\\.so\\.6$", "^ld-linux-x86-64\\.so\\.2$"]
+    },
+    {
+      "provided_by": "GCC runtime (libstdc++, libgcc)",
+      "patterns": ["^libstdc\\+\\+\\.so\\.6$", "^libgcc_s\\.so\\.1$"]
+    },
+    {
+      "provided_by": "OpenSSL 3",
+      "patterns": ["^libssl\\.so\\.3$", "^libcrypto\\.so\\.3$"]
+    },
+    {
+      "provided_by": "ROCm runtime",
+      "patterns": [
+        "^libamdhip64\\.so\\.[0-9]+$",
+        "^libhipblas\\.so\\.[0-9]+$",
+        "^librocblas\\.so\\.[0-9]+$",
+        "^libomp\\.so$"
+      ]
+    }
+  ],
+  "rpath_allowed_absolute": ["/opt/rocm/lib"],
+  "runtime": {
+    "library_path": ["{archive_dir}", "{rocm_root}/lib"],
+    "loader_timeout_seconds": 60,
+    "startup_timeout_seconds": 60,
+    "startup_cpu_flags": [
+      "avx2", "fma", "f16c", "bmi2",
+      "avx512f", "avx512dq", "avx512cd", "avx512bw", "avx512vl",
+      "avx512ifma", "avx512vbmi", "avx512_vbmi2", "avx512_vnni",
+      "avx512_bitalg", "avx512_vpopcntdq", "avx512_bf16", "avx512_vp2intersect",
+      "avx_vnni", "gfni", "vaes", "vpclmulqdq", "movdiri", "movdir64b"
+    ],
+    "startup_checks": [
+      {"executable": "llama-cli", "args": ["--version"]},
+      {"executable": "llama-server", "args": ["--version"]},
+      {"executable": "llama-bench", "args": ["--help"]}
+    ]
+  },
+  "release_gate": {
+    "required_checks": [
+      "metadata",
+      "archive-integrity",
+      "safe-extraction",
+      "inventory",
+      "permissions",
+      "elf-architecture",
+      "dependency-closure",
+      "required-linkage",
+      "loader-resolution"
+    ]
+  }
+}

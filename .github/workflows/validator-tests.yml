@@ -1,0 +1,30 @@
+name: Release validator tests
+
+on:
+  pull_request:
+    paths:
+      - "ci/**"
+      - ".github/workflows/**"
+  push:
+    branches:
+      - main
+    paths:
+      - "ci/**"
+      - ".github/workflows/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Validator unit and negative tests
+    # Ubuntu 24.04 provides Python 3.12 (tarfile extraction filters) and gcc for
+    # the end-to-end loader/startup tests.
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+
+      - name: Run tests
+        run: python3 -m unittest discover -s ci/tests -v
